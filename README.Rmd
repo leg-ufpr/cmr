@@ -1,15 +1,348 @@
-# Como fazer Código Mínimo Reproduível
+---
+output:
+  html_document:
+    keep_md: true
+---
+
+# Como fazer Código Mínimo Reproduzível
 
 ## Objetivos ##
+
+Nunca envie anexos!
+
+O objetivos desse documento são ilustrar opções para gerar código mínimo
+reproduvível.
 
 ## CMR autocontida ##
 
 Aqui a mensagem contém os dados, sem precisar de terceiros.
 
-### Usando `dput` ###
+### Exportanto para texto ###
+
+A função `dput()` escreve a presentação em modo texto de objetos no
+*console* (*output*). Com essa representação em texto de um objeto, você
+pode recriá-lo integralmente, basta recortar o resultado do *console* e
+colar no *script*.
+
+A função `dump()`, no entanto, é mais aconselhada para transferir
+objetos entre sessões R. A diferença é
+que a `dump()` permite exportar vários objetos e não escreve o resultado
+no console, mas num arquivo `.R`, o que é conveninete pois pode-se usar
+o `source()` para recriar os objetos.
+
+Usar essas duas funções para disponibilar dados em correios é algo muito
+simples. Abaixo estão formas de usá-las. Note que a seleção das
+primeiras linhas dos *data.frames* é apenas para evitar *outputs*
+extensos nesse guia.
+
+```{r}
+## Comportamento default.
+dput(iris[1:5, ])
+
+## Não exporta os atributos e fatores.
+dput(iris[1:5, ], control=NULL)
+
+## Mais um exemplo.
+dput(mtcars[1:5, ])
+
+## Cria um arquivo dumpdata.R com dois objetos exportados
+x <- iris[1:5, ]
+y <- mtcars[1:5, ]
+dump(c("x", "y"))
+
+## Exibe o conteúdo do arquivo.
+system("cat dumpdata.R")
+
+## Limpa o ambiente de trabalho.
+rm(list=ls())
+
+## Carrega o arquivo com os objetos exportados.
+source("dumpdata.R")
+
+## Tcharam! Objetos recriados.
+ls()
+
+```
+
+Como já mencionado, tanto usando `dput()` quanto `dump()`, você deve
+enviar no seu correio essa saída modo texto. Então será preciso,
+logicamente, recortar (do console ou do arquivo `.R`), e colar na
+mensagem. Não se esqueça de atribuir a um objeto. Segue abaixo um
+exemplo 
+
+```
+Pessoal, eu tenho um conjunto de dados e quando vou calcular a média
+recebo NA como resultado. O que eu preciso fazer para ter resultados
+numéricos?
+
+##-------------------------------------------
+## Meu CMR.
+
+dados <- 
+structure(list(mpg = c(NA, 21, 22.8, 21.4, 18.7), cyl = c(6, 
+6, 4, 6, 8), disp = c(160, 160, 108, 258, 360), hp = c(110, 110, 
+93, 110, 175), drat = c(NA, 3.9, 3.85, 3.08, 3.15), wt = c(2.62, 
+2.875, 2.32, 3.215, 3.44), qsec = c(16.46, 17.02, 18.61, 19.44, 
+17.02), vs = c(0, 0, 1, 1, 0), am = c(1, 1, 1, 0, 0), gear = c(4, 
+4, 4, 3, 3), carb = c(4, 4, 1, 1, 2)), .Names = c("mpg", "cyl", 
+"disp", "hp", "drat", "wt", "qsec", "vs", "am", "gear", "carb"
+), row.names = c("Mazda RX4", "Mazda RX4 Wag", "Datsun 710", 
+"Hornet 4 Drive", "Hornet Sportabout"), class = "data.frame")
+
+str(dados)
+
+mean(dados$mpg) ## Dá NA.
+mean(dados$cyl) ## Ok.
+
+##-------------------------------------------
+
+Grato pela atenção.
+Joselito.
+
+```
+
+Algumas recomendações:
+
+**Evite remover os atributos**
+
+Quando você exporta um *data.frame* e usa `control=NULL` o que você
+recebe é uma lista e os fatores passam ser númericos além de outros
+efeitos causados pela "simplificação". Nesse caso é simples explicar. Um
+*data.frame* é uma lista onde todos os elementos são vetores (ou
+matrizes) de mesmo comprimento e um fator são número inteiros com
+rótulos indicando o nome do nível, para ser bem simplista. Então, ao
+remover os atributos, você faz a representação mínima desses elementos.
+     
+```{r}
+## x <- iris[1:5, ]
+## dput(x)
+## dput(x, control=NULL)
+
+x <- 
+structure(list(Sepal.Length = c(5.1, 4.9, 4.7, 4.6, 5), Sepal.Width = c(3.5, 
+3, 3.2, 3.1, 3.6), Petal.Length = c(1.4, 1.4, 1.3, 1.5, 1.4), 
+    Petal.Width = c(0.2, 0.2, 0.2, 0.2, 0.2), Species = structure(c(1L, 
+    1L, 1L, 1L, 1L), .Label = c("setosa", "versicolor", "virginica"
+    ), class = "factor")), .Names = c("Sepal.Length", "Sepal.Width", 
+"Petal.Length", "Petal.Width", "Species"), row.names = c(NA, 
+5L), class = "data.frame")
+
+y <- 
+list(Sepal.Length = c(5.1, 4.9, 4.7, 4.6, 5), Sepal.Width = c(3.5, 
+3, 3.2, 3.1, 3.6), Petal.Length = c(1.4, 1.4, 1.3, 1.5, 1.4), 
+    Petal.Width = c(0.2, 0.2, 0.2, 0.2, 0.2), Species = c(1, 
+    1, 1, 1, 1))
+
+str(x)
+str(y)
+```
+
+**Procure enviar só o necessário**
+
+Não é raro você estar analisando um conjunto de dados de 1000 linhas mas
+poder reduzir ele para 30 e ainda rodar o código, certo? Nesse caso, é
+melhor que você envie a menor represetação dos dados capaz de ilustrar o
+seu problema. Muitos serviços de email, principalmente de listas de
+discussão, não enviam mensagem com um corpo grande. Então, sua mensagem
+corre o risco de não chegar aos destinatários.
+
+Da mesma forma, envie apenas as colunas necessárias para o seu caso. Se
+o seus dados tem 50 colunas mas o problema só considerar as 3 primeiras
+colunas, então exporte apenas estas.
+
+**Arredonde valores para encurtar a saída**
+
+Colunas de números não inteiros são exportadas com a precisão de
+registro das variáveis. Com isso, na saída você pode ter muitas casas
+decimais, geralmente desnecessárias pro problema em questão.
+
+```{r}
+x <- matrix(rnorm(20), ncol=2)
+
+## Com a precisão original.
+dput(x)
+
+## Arredondamento para 2 casas.
+dput(round(x, 2))
+
+```
+
+**Ao indentar/editar, preserve**
+
+Se for indentar essa saída, embora não seja necessário, tome cuidado
+para preservar o conteúdo. Certas pessoas têm o hábito de sempre
+indentar porque valorizam os benefícios disso, facilita a compreensão do
+código. No entanto, ao editar essa saída seja cuidadoso pois vírgulas,
+aspas, parenteses, podem ser removidos sem querer, assim como outros
+dados. Sempre após editar, confira se os dados são recuparados sem
+erros. Perceba também que ao indentar o código fica mais extenso, mais
+vertical.
+
+```{r, eval=FALSE}
+## dput(iris[1:5, ])
+
+## Sem indentar.
+x <- 
+structure(list(Sepal.Length = c(5.1, 4.9, 4.7, 4.6, 5), Sepal.Width = c(3.5, 
+3, 3.2, 3.1, 3.6), Petal.Length = c(1.4, 1.4, 1.3, 1.5, 1.4), 
+    Petal.Width = c(0.2, 0.2, 0.2, 0.2, 0.2), Species = structure(c(1L, 
+    1L, 1L, 1L, 1L), .Label = c("setosa", "versicolor", "virginica"
+    ), class = "factor")), .Names = c("Sepal.Length", "Sepal.Width", 
+"Petal.Length", "Petal.Width", "Species"), row.names = c(NA, 
+5L), class = "data.frame")
+
+## Indentado.
+x <- 
+    structure(
+        list(Sepal.Length = c(5.1, 4.9, 4.7, 4.6, 5),
+             Sepal.Width = c(3.5, 3, 3.2, 3.1, 3.6),
+             Petal.Length = c(1.4, 1.4, 1.3, 1.5, 1.4), 
+             Petal.Width = c(0.2, 0.2, 0.2, 0.2, 0.2),
+             Species = structure(
+                 c(1L, 1L, 1L, 1L, 1L),
+                 .Label = c("setosa", "versicolor", "virginica"),
+                 class = "factor")),
+        .Names = c("Sepal.Length", "Sepal.Width", "Petal.Length",
+                   "Petal.Width", "Species"),
+        row.names = c(NA, 5L),
+        class = "data.frame")
+
+```
 
 ### Gerando valores
 
+Um dos tipos de mensagem mais comuns é aquele em que a pessoa quer
+aplicar um procedimento à um conjunto de dados de estrutura
+definida. Por exemplo, 1) extrair a média para todas as colunas de uma
+tabela, 2) filtrar uma tabela mantendo apenas linhas onde o valor de uma
+variável é maior que 10, 3) ...
+
+O que esses exemplos têm em comum? Que o foco é o processo e não os
+dados. Se qualquer dado é valido, porque não simular?
+
+```{r}
+## Gerar uma matriz 10x5 de números aleatórios.
+m <- matrix(10*5, nrow=10, ncol=5)
+
+## Gerar dados conforme um experimento de blocos completos, b=5 e t=3.
+da <- expand.grid(bloc=gl(n=5, k=1),
+                  trt=gl(n=3, k=1, labels=c("A", "B", "C")),
+                  KEEP.OUT.ATTRS=FALSE)
+da$y <- rnorm(nrow(da))
+str(da)
+
+```
+
+Para situações como essa, as funções de geração de números aleatórios,
+sequencias regulares, e estruturas regulares são fundamentais.
+
+**Números aleatórios**
+
+O pacote `stats` do R, presente em qualquer sessão, contém funções para
+ferar números aleatórios das distribuições de probabilidade mais
+conhecidas. Segue na tabela abaixo a relação dessas funções. Consulte
+<http://www.r-tutor.com/elementary-statistics/probability-distributions>
+e <http://www.stat.umn.edu/geyer/old/5101/rlook.html> para mais detalhes
+e aplicações.
+
+```{r, echo=FALSE, results="as.is"}
+## Reração de números aleatórios.
+## dput((grep(pattern="^r.*$", ls("package:stats"), value=TRUE)))
+
+x <- c("rbeta", "rbinom", "rcauchy", "rchisq", "rexp", "rf", "rgamma",
+       "rgeom", "rhyper", "rlnorm", "rlogis", "rmultinom", "rnbinom",
+       "rnorm", "rpois", "rsignrank", "rstandard", "rstudent", "rt",
+       "runif", "rweibull", "rwilcox", "rWishart")
+ncol <- 5
+length(x) <- ((length(x)%/%ncol)+1)*ncol
+x[is.na(x)] <- ""
+m <- as.data.frame(matrix(x, ncol=ncol), stringsAsFactors=FALSE)
+
+knitr::kable(m, row.names=FALSE, col.names=1:ncol)
+
+```
+
+A função `sample()` faz amostras aleatórias, com reposição ou não, de um
+vetor de valores passados.
+
+```{r}
+L <- LETTERS[1:5]
+sample(L)
+sample(L, size=3)
+sample(L, size=10, replace=TRUE)
+
+## 5 repetições de uma amostragem sem reposição de tamanho 3.
+replicate(n=5, expr=sample(L, size=3))
+```
+
+**Sequências regulares**
+
+As funções `seq()` e `rep()` podem ser usadas para gerar sequências
+regulares. Quando combinadas, diversos padrões podem ser obtidos. Alguns
+exemplos de uso estão disponíveis abaixo.
+
+```{r}
+##-------------------------------------------
+## Sequências.
+
+## Começa em 4, não ultrapassa 40, têm incremento 8.
+seq(from=4, to=40, by=8)
+
+## De -5 à 5 com 11 valores.
+seq(from=-5, to=5, length.out=11)
+
+## De 0 com incremento 0.2 até obter 10 valores.
+seq(from=0, by=0.2, length.out=10)
+
+##-------------------------------------------
+## Com datas.
+
+## A seq() chama a seq.Date() quando objetos são datas.
+seq.Date(from=as.Date("2016-02-01"),
+         to=as.Date("2016-02-05"),
+         by="day")
+
+seq(from=as.Date("2016-02-01"),
+    to=as.Date("2016-02-05"),
+    by="2 days")
+
+seq(from=as.Date("2016-02-01"),
+    to=as.Date("2016-04-01"),
+    by="2 weeks")
+
+seq(from=as.Date("2016-02-01"),
+    to=as.Date("2016-12-31"),
+    by="3 months")
+
+seq(from=as.POSIXct("2016-02-01 00:00:00"),
+    to=as.POSIXct("2016-02-01 00:30:00"),
+    by="5 mins")
+
+##-------------------------------------------
+## Repetições.
+
+## Repete o vetor 5 vezes.
+rep(1:3, times=5)
+
+## Repete cada elemento 5 vezes.
+rep(1:3, each=5)
+rep(rep(letters[1:3], each=2), times=3)
+
+```
+
+**Estruturas regulares**
+
+A função `expand.grid()` gera combinações cartesianas. ... FIXME
+
+```{r}
+da <- expand.grid(A=1:3, B=c(10, 20), C=c("A", "B"))
+da
+
+```
+
+Pacote Algdesign, FrF2 para delineamentos.
+
+****
 ## Hospedando os dados ##
 
 Listar opções gratuítas para hospedar dados.
