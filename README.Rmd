@@ -356,15 +356,17 @@ com acesso à outras pessoas.
 **Dropbox**
 
 O <http://dropbox.com/> é o serviço de sincronização de arquivos e
-espaço na núvem mais conhecido que existe. Se você usar o Dropbox, note
-que existe um diretório chamado `Public/`. Como sugere, o conteúdo desse
-diretório é publico. Chique o botão direito sobre algum arquivo para
+espaço na núvem mais conhecido que existe. No diretório Dropbox um
+diretório chamado `Public/`. Como sugere, o seu conteúdo é
+público. Chique com o botão direito sobre algum arquivo dentro da `Public/` para
 pegar o link de acesso (`Dropbox > Copy Public Link`). Envie esse link
-para seus destinatários. No nosso caso, podemos hospedar um arquivo
-`.txt` (embora sirva para qualquer outro também) e ler de dentro de uma
-sessão R. Nesse diretório tem um arquivo chamado `How to use the Public
-folder.txt` que informa como usar o recurso. Para demonstar, vou pegar o
-link desse arquivo e ler com o R.
+para seus destinatários. O arquivo pode ser qualquer coisa.
+
+No nosso caso, podemos hospedar um arquivo `.txt` (`.csv`, `.R`,
+`.RData`) e ler de dentro de uma sessão R. Para exemplificar, nesse
+diretório tem um arquivo chamado `How to use the Public folder.txt` que
+informa como usar o recurso. Vou pegar o link desse arquivo e ler com o
+R.
 
 ```{r}
 url <-
@@ -375,35 +377,52 @@ da <- readLines(url, encoding="UTF-8")
 cat(unlist(lapply(da, FUN=strwrap, width=60)), sep="\n")
 ```
 
-Como diz o texto, apenas links para arquivos, e não diretórios,
-existem. Caso precise enviar muitos arquivos, compacte o diretório (faça
-um `.zip`, `.rar`, etc).
+Repare na url. Note que `u/48140237/` identifica o usuário, no caso
+eu. Todas os arquivos da minha `Public/` terão o mesmo prefixo, o que
+vai mudar na url é o nome do arquivo, obviamente.
 
-*Importante*: No seu CMR já use o link dentro de uma função `read.*()`,
-ou outra, enfim, isso depende do tipo de dado. É sempre recomendável que
-você indique o *encoding* durante a leitura.
+Como diz o texto, existem apenas links para arquivos, e não para
+diretórios. Caso precise enviar muitos arquivos, faça um arquivo
+compactado com eles (um `.zip`, `.rar`, etc).
+
+Embora não se possa descobrir quem é o usuário correspondente a um link
+e também não seja possível ver todo o conteúdo do `Public/` pelo prefixo
+da url, muitos não se sentem confortáveis em usar a `Public/` para
+compartilhar arquivos. Preferem algo (supostamente) mais anônimo ou
+seguro.
+
+*Importante*: No seu CMR já use a url dentro de uma função de leitura,
+como as `read*()`, `source()`, `load()`, `download.file()`, etc,
+conforme for a necessidade. Evite de fazer seu colaborador abrir o
+endereço no navegador e se dar o trabalho de baixar, salvar, enfim. É
+sempre recomendável que você indique o *encoding* durante a leitura.
 
 Mais sobre a `Public/` você encontra em
 [What is the Public folder for?](https://www.dropbox.com/en/help/16)
 
-É <https://www.copy.com/> o um serviço equivalente.
+Outros serviços têm recursos semelhantes ao Dropbox. Um que conheci
+recentemente, mas que não uso, é o <https://www.copy.com/>. O plano
+*free* oferece 15 GB enquanto que o Dropbox só 2 GB e existe versões do
+serviço para smartfones e tablets.
 
 **Infotomb**
 
 Infotomb (<https://infotomb.com/>) é um repositório de arquivos
-anônimo. Arquivos textos podem ser disponibilizados pelo site, bem como
-qualquer outro formato (jgp, png, pdf, etc). Os arquivos tem um tempo de
-vida que pode ser modificado (1) após o upload. Também é possível
-atribuir senha aos arquivos (2) para restringir o acesso. O mais
-interessante, no entanto, é que o arquivo e pode ser lido diretamente
-pelo link (3). Muitos serviços de hopedagem não dão uma url do arquivo
-que permite a leitura por ele, apenas dão um link que abre uma caixa de
-download, você clica em OK e baixa. Parece exagero de preocupação mas
-com o link para ler direto a coisa vai mais rápido, se resolve na sessão
-R. Com botão de download a pessoa tem que salvar o arquivo, mudar o
-diretório de trabalho, ler e depois lembrar de deletar o arquivo.
+anônimo. Não só arquivos de textos podem ser compartilhados pelo
+serviço, mas qualquer outro formato (jgp, pdf, csv, etc). Os arquivos
+tem um tempo de vida que pode ser definido (1) após o upload. Também é
+possível atribuir senha aos arquivos (2) para restringir o acesso. O
+mais interessante, no entanto, é que o arquivo e pode ser lido
+diretamente pela url (3).
 
-![](infotumb.png)
+![](infotomb.png)
+
+Muitos serviços de hospedagem não dão uma url que permite a leitura do
+arquivo, apenas dão um link que abre uma caixa de download para clica em
+OK e baixar. Parece exagero de preocupação mas com a url para ler direto
+tudo é mais fácil, são menos etapas, se resolve na sessão R. Com botão
+de download é preciso salvar o arquivo, mudar o diretório de trabalho,
+ler e depois lembrar de deletar quando não for mais necessário.
 
 ```{r, eval=FALSE}
 url <- "https://infotomb.com/ctriw.txt"
@@ -417,15 +436,56 @@ str(da)
 ##  $ dist : int  2 10 4 22 16 10 18 26 34 17 ...
 ```
 
+**Pastebin**
+
+O <http://pastebin.com/> permite envio apenas de texto, diferente do
+anterior, que permite upload de qualquer arquivo. O pastebin nem tem
+botão de upload. O texto (seus dados ou código) precisa ser colados na
+caixa de texto. Isso porque o pastebin é mais usado para trocar
+fragmentos de código e não de dados, geralmente arquivos com muitas
+linhas. Inclusive, pensando em código, o pastebin tem recurso de *sintax
+highlight* justamente para facilitar a leitura do código
+compartilhado.
+
+No pastebin, assim como o anterior, os dados possuem uma url da qual
+podem ser lidos. Você não precisa ter uma conta (mas pode fazer uma) e
+pode controlar o tempo de expiração também. Para pegar a url de
+download, copie da barra de endereços o que aparecer quando você clicar
+em `raw` e use para ler os dados (ou carregar *script*). Quando você
+clica no botão `raw` (1), o endereço exibido (2) ganha um `raw/` no
+meio. Os dados exibidos na figura são carregados da mesma forma.
+
+```{r, eval=FALSE}
+url <- "http://pastebin.com/raw/Nf2zb190"
+da <- read.table(url, header=TRUE, sep="\t")
+str(da)
+```
+```
+'data.frame':	25 obs. of  4 variables:
+ $ Linha : Factor w/ 5 levels "I","II","III",..: 1 1 1 1 1 2 2 2 2 2 ...
+ $ Coluna: Factor w/ 5 levels "I","II","III",..: 1 2 3 4 5 1 2 3 4 5 ...
+ $ Cult  : Factor w/ 5 levels "A","B","C","D",..: 1 4 2 3 5 3 5 4 2 1 ...
+ $ Prod  : num  13.1 13.2 24.5 11.3 18.5 10 18.9 14.2 23 15 ...
+```
+
+![](pastebin2.png)
+
+Funções podem ter código renderizado.
+
+![](pastebin.png)
+
 **Data File Host**
 
-No <http://www.datafilehost.com/> você sobe o arquivo e links para
-download são gerados. Diferente do anterior, não é dado link para
-download direto e sim para uma caixa de diálogo com botão de
-download. Os arquivos são removidos quando ultrapassam 90 dias sem
-downloads.
+No <http://www.datafilehost.com/> você sobe o arquivo e a url para
+download é gerada. Diferente dos dois anteriores, não é dada url para
+download direto e sim uma caixa de diálogo com botão de download. Não
+tem como fazer conta e os arquivos são removidos quando ultrapassam 90
+dias sem download.
 
 ![](datafilehost.png)
+
+Comparado às soluções já apresentadas, o Data File Host é menos
+interessante por não er url de download.
 
 **GitHub, GitLab e outros**
 
@@ -446,7 +506,7 @@ moodle, essa é uma opção interessante.
 http://www.leg.ufpr.br/doku.php/disciplinas:ce003ko-2015-02:historico
 dia 04/11
 
-```{r}
+```{r, eval=FALSE}
 url <- "http://www.leg.ufpr.br/lib/exe/fetch.php/disciplinas:ce003ko-2015-02:ce003-201101.csv"
 da <- read.csv2(url)
 
