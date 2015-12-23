@@ -345,14 +345,135 @@ Pacote Algdesign, FrF2 para delineamentos.
 ****
 ## Hospedando os dados ##
 
-Listar opções gratuítas para hospedar dados.
+Quando o problema endereçado não pode ser resolvido com dados dentro da
+mensagem ou vindos de simulação ou quando o problema é na realidade dado
+dependente (mas não grandes) você pode (e deve) hospedar em algum lugar
+público. **Jamais envie dados anexados na mensagem**.
 
- * GitHub e outros;
- * Diretório público;
- * datafilehost;
- * Diretório público do Dropbox;
- * Google Drive;
- * One Drive;
+Vivemos cheios de alternativas que permitem hospedar arquivos na nuvem
+com acesso à outras pessoas. 
+
+**Dropbox**
+
+O <http://dropbox.com/> é o serviço de sincronização de arquivos e
+espaço na núvem mais conhecido que existe. Se você usar o Dropbox, note
+que existe um diretório chamado `Public/`. Como sugere, o conteúdo desse
+diretório é publico. Chique o botão direito sobre algum arquivo para
+pegar o link de acesso (`Dropbox > Copy Public Link`). Envie esse link
+para seus destinatários. No nosso caso, podemos hospedar um arquivo
+`.txt` (embora sirva para qualquer outro também) e ler de dentro de uma
+sessão R. Nesse diretório tem um arquivo chamado `How to use the Public
+folder.txt` que informa como usar o recurso. Para demonstar, vou pegar o
+link desse arquivo e ler com o R.
+
+```{r}
+url <-
+    "https://dl.dropboxusercontent.com/u/48140237/How%20to%20use%20the%20Public%20folder.txt"
+da <- readLines(url, encoding="UTF-8")
+
+## Para exibir o texto sem ultrapassar 60 digitos por linha.
+cat(unlist(lapply(da, FUN=strwrap, width=60)), sep="\n")
+```
+
+Como diz o texto, apenas links para arquivos, e não diretórios,
+existem. Caso precise enviar muitos arquivos, compacte o diretório (faça
+um `.zip`, `.rar`, etc).
+
+*Importante*: No seu CMR já use o link dentro de uma função `read.*()`,
+ou outra, enfim, isso depende do tipo de dado. É sempre recomendável que
+você indique o *encoding* durante a leitura.
+
+Mais sobre a `Public/` você encontra em
+[What is the Public folder for?](https://www.dropbox.com/en/help/16)
+
+É <https://www.copy.com/> o um serviço equivalente.
+
+**Infotomb**
+
+Infotomb (<https://infotomb.com/>) é um repositório de arquivos
+anônimo. Arquivos textos podem ser disponibilizados pelo site, bem como
+qualquer outro formato (jgp, png, pdf, etc). Os arquivos tem um tempo de
+vida que pode ser modificado (1) após o upload. Também é possível
+atribuir senha aos arquivos (2) para restringir o acesso. O mais
+interessante, no entanto, é que o arquivo e pode ser lido diretamente
+pelo link (3). Muitos serviços de hopedagem não dão uma url do arquivo
+que permite a leitura por ele, apenas dão um link que abre uma caixa de
+download, você clica em OK e baixa. Parece exagero de preocupação mas
+com o link para ler direto a coisa vai mais rápido, se resolve na sessão
+R. Com botão de download a pessoa tem que salvar o arquivo, mudar o
+diretório de trabalho, ler e depois lembrar de deletar o arquivo.
+
+![](infotumb.png)
+
+```{r, eval=FALSE}
+url <- "https://infotomb.com/ctriw.txt"
+da <- read.csv(url)
+str(da)
+```
+```
+## 'data.frame':	50 obs. of  3 variables:
+##  $ X    : int  1 2 3 4 5 6 7 8 9 10 ...
+##  $ speed: int  4 4 7 7 8 9 10 10 10 11 ...
+##  $ dist : int  2 10 4 22 16 10 18 26 34 17 ...
+```
+
+**Data File Host**
+
+No <http://www.datafilehost.com/> você sobe o arquivo e links para
+download são gerados. Diferente do anterior, não é dado link para
+download direto e sim para uma caixa de diálogo com botão de
+download. Os arquivos são removidos quando ultrapassam 90 dias sem
+downloads.
+
+![](datafilehost.png)
+
+**GitHub, GitLab e outros**
+
+Pegar o raw do arquivo, como esse
+https://raw.githubusercontent.com/walmes/emacs/master/dotemacs.el.
+
+**Google Drive, One Drive**
+
+<https://onedrive.live.com/> não tem para Linux. Sky ou One drive?
+<https://www.google.com/drive/> não gera link público, só permite
+compartilhar com pessoas, requer conta google.
+
+**Wikis e Blogs**
+
+Se você tem acesso (é dono) de blog ou tem uma wiki, até mesmo um
+moodle, essa é uma opção interessante.
+
+http://www.leg.ufpr.br/doku.php/disciplinas:ce003ko-2015-02:historico
+dia 04/11
+
+```{r}
+url <- "http://www.leg.ufpr.br/lib/exe/fetch.php/disciplinas:ce003ko-2015-02:ce003-201101.csv"
+da <- read.csv2(url)
+
+```
+
+![](wiki.png)
+
+**Text Uploader**
+
+<http://textuploader.com> Compartilhar snippets, não requer conta, mas a
+pessoa teria que recortar. Tem highligths.
+
+```{r, eval=FALSE, include=FALSE}
+## Isso não é viável.
+library(XML)
+
+x <- readLines("http://textuploader.com/5f97k")
+h <- htmlTreeParse(file=x, asText=TRUE,
+                   useInternalNodes=TRUE, encoding="utf-8")
+summary(h)
+getNodeSet(doc=h, path="//code[@class]", fun=xmlValue)
+
+readLines("https://m.uploadedit.com/ba3n/1450876813762.csv")
+
+readLines("http://www.datafilehost.com/get.php?file=f080fcba")
+
+```
 
 ### Usando `read.*` ###
 
